@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hand &amp; Foot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  /* felt table */
+  --felt:#123526;
+  --felt-deep:#0A2118;
+  --felt-line:#1F5A3E;
+
+  /* ledger paper */
+  --cream:#F4ECD6;
+  --cream-deep:#E5D6AC;
+
+  /* ink & accents */
+  --ink:#26190E;
+  --ink-soft:#6E5A37;
+  --brass:#C7A34A;
+  --brass-deep:#9C7C2E;
+  --ember:#A13F2B;
+
+  /* legacy names kept only so the one inline JS style (New Game button,
+     which sets background:var(--green); color:var(--text)) still resolves
+     correctly against this palette — not used elsewhere in this sheet */
+  --green:#C7A34A;
+  --text:#26190E;
+  --bg:#123526;
+  --panel:#F4ECD6;
+  --border:#D9C9A0;
+  --muted:#6E5A37;
+  --btn:#0F3524;
+  --btn2:#E5D6AC;
+  --danger:#A13F2B;
+}
+
+html{
+  height:100%;
+  font-size:clamp(14px,3.6vw,17px);
+}
+
+*{box-sizing:border-box}
+::selection{background:var(--brass);color:var(--ink)}
+
+body{
+  margin:0;
+  height:100dvh;
+  height:100svh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 18px 18px, rgba(244,236,214,.035) 0 2px, transparent 2.2px),
+    radial-gradient(circle at 54px 54px, rgba(244,236,214,.03) 0 2px, transparent 2.2px),
+    linear-gradient(180deg,var(--felt-deep),var(--felt) 12%, var(--felt) 88%, var(--felt-deep));
+  background-size:72px 72px,72px 72px,100% 100%;
+  background-attachment:fixed;
+  color:var(--cream);
+  font-family:'Space Grotesk',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+
+header{
+  position:relative;
+  flex:none;
+  padding:clamp(12px,3vh,20px) 14px clamp(10px,2vh,16px);
+  text-align:center;
+  border-bottom:2px solid var(--brass);
+  box-shadow:0 1px 0 rgba(0,0,0,.4);
+  background:linear-gradient(180deg,rgba(0,0,0,.15),transparent);
+}
+header .icon{font-size:clamp(1rem,3vw,1.15rem);margin:0 10px;vertical-align:-2px;opacity:.9}
+header .htitle{
+  font-family:'Fraunces',serif;
+  font-weight:900;
+  font-optical-sizing:auto;
+  font-size:clamp(1.25rem,5vw,1.7rem);
+  letter-spacing:.5px;
+  color:var(--cream);
+}
+header .pip{color:var(--brass);font-size:1rem;letter-spacing:2px}
+header .tagline{
+  display:block;margin-top:6px;font-family:'Space Grotesk',sans-serif;
+  font-size:.66rem;font-weight:600;letter-spacing:3.5px;text-transform:uppercase;
+  color:var(--brass);opacity:.85;
+}
+
+main{
+  flex:1;
+  min-height:0;
+  width:100%;
+  max-width:600px;
+  margin:0 auto;
+  padding:clamp(10px,2.5vw,16px) clamp(10px,3vw,14px) clamp(10px,2.5vh,16px);
+  display:flex;
+  flex-direction:column;
+}
+
+.topbar{display:flex;align-items:center;gap:clamp(6px,2vw,10px);margin-bottom:clamp(10px,2vh,16px);flex:none}
+.topbar button{
+  border:2px solid var(--brass);border-radius:999px;
+  padding:clamp(9px,2vh,11px) clamp(12px,3vw,18px);
+  font-weight:700;font-family:'Space Grotesk',sans-serif;font-size:clamp(.78rem,2.4vw,.88rem);
+  background:var(--brass);color:var(--ink);letter-spacing:.2px;white-space:nowrap;
+}
+.topbar .rules{background:transparent;color:var(--cream)}
+.round{
+  flex:1;text-align:center;font-family:'Fraunces',serif;font-weight:700;
+  font-size:clamp(.85rem,2.6vw,1rem);
+  color:var(--cream);background:rgba(0,0,0,.18);
+  border:1px dashed rgba(199,163,74,.55);border-radius:14px;
+  padding:clamp(6px,1.4vh,8px) 10px;line-height:1.2;
+  min-width:0;overflow:hidden;
+}
+.round .ruleset{
+  display:block;font-family:'Space Grotesk',sans-serif;font-size:.64rem;font-weight:600;
+  letter-spacing:1.6px;text-transform:uppercase;color:var(--brass);margin-top:3px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+
+.list{
+  display:flex;flex-direction:column;gap:clamp(8px,1.6vh,12px);
+  flex:1;min-height:0;overflow-y:auto;
+  padding-right:2px;
+  scrollbar-width:thin;
+}
+
+.team{
+  display:grid;grid-template-columns:1fr auto auto;align-items:center;
+  gap:clamp(8px,2vw,12px);padding:clamp(12px,2.4vh,18px) clamp(12px,3vw,16px);
+  flex:1 1 0;min-height:clamp(64px,11vh,92px);
+  border-radius:16px;
+  border:1px solid rgba(0,0,0,.25);
+  box-shadow:0 6px 16px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.name{
+  font-family:'Fraunces',serif;font-weight:700;font-size:clamp(.95rem,3vw,1.14rem);cursor:pointer;
+  min-width:0;overflow-wrap:anywhere;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35);
+}
+.name .rdlabel{
+  display:block;font-family:'Space Grotesk',sans-serif;font-size:clamp(.62rem,1.8vw,.7rem);font-weight:600;
+  letter-spacing:.3px;opacity:.85;margin-top:4px;text-shadow:none;
+}
+
+.score{
+  font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(1.25rem,4.4vw,1.7rem);
+  font-variant-numeric:tabular-nums;
+  padding:clamp(6px,1.4vh,9px) clamp(8px,2vw,12px);border-radius:12px;
+  background:rgba(0,0,0,.3);border:1px solid rgba(199,163,74,.5);
+  min-width:0;width:clamp(80px,22vw,104px);text-align:right;cursor:pointer;color:var(--cream);
+}
+
+.scorebtn{
+  border:1px solid rgba(244,236,214,.35);border-radius:12px;
+  padding:clamp(9px,2vh,13px) clamp(10px,2.6vw,15px);
+  font-weight:700;font-family:'Space Grotesk',sans-serif;font-size:clamp(.68rem,2vw,.78rem);
+  letter-spacing:1px;text-transform:uppercase;
+  background:rgba(0,0,0,.28);color:var(--cream);white-space:nowrap;
+}
+
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:clamp(10px,2vh,16px);flex:none}
+.controls button{
+  border:2px solid var(--felt-line);border-radius:14px;padding:clamp(11px,2.2vh,14px);font-weight:700;
+  font-family:'Space Grotesk',sans-serif;font-size:clamp(.82rem,2.4vw,.95rem);
+  background:rgba(0,0,0,.18);color:var(--cream);
+}
+.controls .end{background:var(--brass);color:var(--ink);border-color:var(--brass)}
+
+.gameover{
+  margin-top:clamp(10px,2vh,16px);padding:clamp(14px,2.6vh,20px) 16px;border-radius:18px;
+  border:2px solid var(--brass);flex:none;
+  background:linear-gradient(180deg,rgba(199,163,74,.16),rgba(199,163,74,.05));
+  text-align:center;display:none;
+}
+.gameover .win{
+  font-family:'Fraunces',serif;font-weight:900;font-size:clamp(1.2rem,4vw,1.5rem);margin-bottom:6px;color:var(--cream);
+}
+.gameover .sub{color:var(--brass);font-weight:600;font-size:clamp(.75rem,2.2vw,.85rem);letter-spacing:.2px}
+
+/* Modals — ledger index cards */
+.modal{
+  position:fixed;inset:0;background:rgba(6,14,10,.72);display:none;
+  align-items:center;justify-content:center;padding:clamp(8px,3vw,16px);z-index:10;
+  backdrop-filter:blur(2px);
+}
+.modalbox{
+  width:100%;max-width:min(420px,94vw);background:var(--cream);
+  border:1px solid var(--cream-deep);border-radius:16px;
+  padding:clamp(14px,3.5vw,18px);
+  max-height:min(88dvh,88vh);overflow-y:auto;color:var(--ink);
+  box-shadow:0 20px 50px rgba(0,0,0,.5);
+  background-image:linear-gradient(rgba(199,163,74,.5) 1px, transparent 1px);
+  background-size:100% 34px;
+  background-position:0 62px;
+}
+.modalbox h3{
+  margin:0 0 4px;text-align:center;font-family:'Fraunces',serif;font-weight:800;
+  font-size:clamp(1.1rem,4vw,1.3rem);color:var(--ink);
+}
+.modalbox .hint{
+  text-align:center;color:var(--ink-soft);font-size:clamp(.76rem,2.4vw,.83rem);margin-bottom:14px;font-weight:500;
+}
+
+.modalbox input{
+  width:100%;padding:13px;border-radius:10px;background:var(--cream-deep);color:var(--ink);
+  font-family:'JetBrains Mono',monospace;font-weight:700;text-align:center;margin-bottom:10px;
+  border:1px solid rgba(38,25,14,.18);
+}
+.modalbox input::placeholder{font-family:'Space Grotesk',sans-serif;font-weight:500;color:var(--ink-soft)}
+.modalbox button{
+  width:100%;border:1px solid rgba(38,25,14,.18);border-radius:10px;padding:14px;font-weight:700;
+  font-family:'Space Grotesk',sans-serif;
+  background:var(--cream-deep);color:var(--ink);margin-bottom:8px;
+}
+.modalbox .primary{background:var(--brass);border-color:var(--brass-deep);color:var(--ink)}
+.modalbox .danger{background:var(--ember);border-color:var(--ember);color:var(--cream)}
+
+.color-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px}
+.color-swatch{height:44px;border-radius:10px;cursor:pointer;border:2px solid rgba(38,25,14,.15)}
+.color-swatch.selected{outline:3px solid var(--ink);outline-offset:2px}
+
+/* Section labels inside modals */
+.seclabel{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:.68rem;font-weight:700;letter-spacing:1.6px;color:var(--brass-deep);
+  text-transform:uppercase;margin:16px 2px 8px;
+  border-bottom:1px solid rgba(156,124,46,.35);padding-bottom:4px;
+}
+.seclabel:first-of-type{margin-top:2px}
+
+/* Stepper rows (score sheet) */
+.steprow{
+  display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.4);
+  border:1px solid rgba(38,25,14,.12);border-radius:12px;
+  padding:8px 10px;margin-bottom:8px;
+}
+.steprow .lab{flex:1;font-weight:700;font-size:.92rem;min-width:0;color:var(--ink)}
+.steprow .lab small{display:block;color:var(--ink-soft);font-weight:600;font-size:.72rem;margin-top:1px}
+.steprow .stepbtn{
+  width:40px;height:40px;border:1px solid var(--brass-deep);border-radius:10px;
+  background:var(--brass);color:var(--ink);font-weight:900;font-size:1.2rem;
+  margin:0;padding:0;flex:none;line-height:1;
+}
+.steprow .count{
+  width:32px;text-align:center;font-family:'JetBrains Mono',monospace;
+  font-weight:700;font-size:1.1rem;flex:none;color:var(--ink);
+}
+
+.togglerow{
+  display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.4);
+  border:1px solid rgba(38,25,14,.12);border-radius:12px;
+  padding:12px;margin-bottom:8px;cursor:pointer;
+}
+.togglerow .box{
+  width:24px;height:24px;border-radius:6px;border:2px solid var(--ink-soft);
+  flex:none;display:flex;align-items:center;justify-content:center;
+  font-weight:900;color:var(--cream);background:transparent;
+}
+.togglerow.on .box{background:var(--felt);border-color:var(--felt)}
+.togglerow .lab{flex:1;font-weight:700;color:var(--ink)}
+.togglerow .lab small{display:block;color:var(--ink-soft);font-weight:600;font-size:.72rem;margin-top:1px}
+
+.sheettotal{
+  text-align:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.15rem;
+  margin:10px 0 12px;padding:12px;border-radius:12px;
+  background:rgba(31,90,62,.16);border:1px solid rgba(31,90,62,.35);color:var(--felt);
+}
+.sheettotal.neg{background:rgba(161,63,43,.14);border-color:rgba(161,63,43,.4);color:var(--ember)}
+
+/* Cards inputs side by side */
+.cardsgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cardsgrid input{margin-bottom:8px}
+
+/* Rules modal */
+.presetwrap{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.preset{
+  flex:1 1 44%;border:1.5px dashed var(--brass-deep);border-radius:10px;padding:11px 8px;
+  font-weight:700;font-family:'Space Grotesk',sans-serif;
+  background:transparent;color:var(--ink);font-size:.85rem;margin:0;width:auto;
+}
+.preset.selected{background:var(--brass);border-style:solid;color:var(--ink)}
+
+.rulerow{
+  display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.4);
+  border:1px solid rgba(38,25,14,.12);border-radius:12px;
+  padding:8px 8px 8px 12px;margin-bottom:8px;
+}
+.rulerow .lab{flex:1;font-weight:700;font-size:.9rem;color:var(--ink)}
+.rulerow .lab small{display:block;color:var(--ink-soft);font-weight:600;font-size:.7rem;margin-top:1px}
+.rulerow input{width:88px;margin:0;padding:11px 6px;flex:none}
+.rulerow .onoff{
+  width:50px;flex:none;border:1px solid rgba(38,25,14,.18);border-radius:8px;padding:9px 0;
+  font-weight:700;font-family:'Space Grotesk',sans-serif;
+  background:var(--cream-deep);color:var(--ink-soft);margin:0;font-size:.72rem;
+}
+.rulerow .onoff.on{background:var(--felt);color:var(--cream);border-color:var(--felt)}
+.rulerow.disabled .lab,.rulerow.disabled input{opacity:.4}
+
+/* Log modal */
+.loground{
+  background:rgba(255,255,255,.35);border:1px solid rgba(38,25,14,.12);
+  border-radius:12px;margin-bottom:8px;overflow:hidden;
+}
+.loground .loghead{
+  display:flex;align-items:center;gap:8px;padding:12px;font-weight:700;cursor:pointer;
+  font-family:'Space Grotesk',sans-serif;color:var(--ink);
+}
+.loground .loghead .rt{flex:1}
+.loground .loghead .pts{font-family:'JetBrains Mono',monospace;font-weight:700}
+.loground .loghead .chev{color:var(--ink-soft);font-weight:900}
+.logentries{display:none;border-top:1px dashed rgba(38,25,14,.2)}
+.loground.open .logentries{display:block}
+.logentry{
+  display:flex;align-items:center;gap:8px;padding:10px 12px;
+  border-bottom:1px dotted rgba(38,25,14,.15);font-weight:600;font-size:.9rem;
+}
+.logentry:last-child{border-bottom:none}
+.logentry .el{flex:1;color:var(--ink)}
+.logentry .ep{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--felt)}
+.logentry .ep.neg{color:var(--ember)}
+.logentry .ex{
+  border:1px solid rgba(161,63,43,.3);background:rgba(161,63,43,.1);color:var(--ember);
+  border-radius:8px;width:32px;height:32px;font-weight:900;margin:0;padding:0;flex:none;
+}
+.logempty{padding:12px;text-align:center;color:var(--ink-soft);font-weight:600;font-size:.88rem}
+
+.logtotal{
+  text-align:center;font-family:'JetBrains Mono',monospace;font-weight:700;
+  font-size:1.05rem;margin:6px 0 12px;color:var(--ink);
+}
+
+/* Confirm modal */
+#confirmMsg{
+  text-align:center;font-weight:600;margin-bottom:16px;line-height:1.5;color:var(--ink-soft);
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <span class="htitle"><span class="pip">♠</span> <span class="icon">🐿️</span>HAND &amp; FOOT <span class="pip">♣</span></span>
+  <span class="tagline">Table Ledger</span>
+</header>
+
+<main>
+
+<div class="topbar">
+  <button onclick="addTeam()">+ Team</button>
+  <div class="round" id="roundLabel"></div>
+  <button class="rules" onclick="openRules()">Rules</button>
+</div>
+
+<div class="list" id="teams"></div>
+
+<div class="controls">
+  <button onclick="askResetRound()">Reset Round</button>
+  <button class="end" id="endBtn" onclick="askEndRound()">End Round</button>
+</div>
+
+<div class="gameover" id="gameOver">
+  <div class="win" id="winnerLine"></div>
+  <div class="sub" id="winnerSub"></div>
+</div>
+
+</main>
+
+<!-- Rules Modal -->
+<div class="modal" id="rulesModal">
+  <div class="modalbox">
+    <h3>Rules</h3>
+
+    <div class="seclabel">Rule Sets</div>
+    <div class="hint" style="margin-bottom:8px">Tap to load. Hold to delete a saved set.</div>
+    <div class="presetwrap" id="presetWrap"></div>
+
+    <div class="seclabel">Books</div>
+    <div class="rulerow">
+      <div class="lab">Clean Book<small>All natural, no wilds</small></div>
+      <input id="r_clean" type="number">
+    </div>
+    <div class="rulerow">
+      <div class="lab">Dirty Book<small>Contains wild cards</small></div>
+      <input id="r_dirty" type="number">
+    </div>
+    <div class="rulerow" id="row_wild">
+      <div class="lab">Wild Book<small>All 2s &amp; Jokers</small></div>
+      <input id="r_wild" type="number">
+      <button class="onoff" onclick="toggleRule('wild')">ON</button>
+    </div>
+    <div class="rulerow" id="row_sevens">
+      <div class="lab">Clean 7s<small>Book of sevens</small></div>
+      <input id="r_sevens" type="number">
+      <button class="onoff" onclick="toggleRule('sevens')">ON</button>
+    </div>
+
+    <div class="seclabel">Bonuses &amp; Penalties</div>
+    <div class="rulerow" id="row_red3">
+      <div class="lab">Red 3 Caught<small>Penalty per card (enter negative)</small></div>
+      <input id="r_red3" type="number">
+      <button class="onoff" onclick="toggleRule('red3')">ON</button>
+    </div>
+    <div class="rulerow" id="row_red3play">
+      <div class="lab">Red 3 Played<small>Bonus per card laid down</small></div>
+      <input id="r_red3play" type="number">
+      <button class="onoff" onclick="toggleRule('red3play')">ON</button>
+    </div>
+    <div class="rulerow" id="row_goout">
+      <div class="lab">Going Out<small>First team out</small></div>
+      <input id="r_goout" type="number">
+      <button class="onoff" onclick="toggleRule('goout')">ON</button>
+    </div>
+
+    <div class="seclabel">Game</div>
+    <div class="rulerow">
+      <div class="lab">Rounds<small>Deals per game</small></div>
+      <input id="r_rounds" type="number" min="1" max="10">
+    </div>
+
+    <div class="seclabel">Save</div>
+    <input id="ruleNameInput" placeholder="Rule set name (e.g. Grandma's House)">
+    <button onclick="saveRuleSet()">Save as Rule Set</button>
+    <button class="primary" onclick="applyRules()">Apply &amp; Close</button>
+    <button onclick="closeModals()">Cancel</button>
+  </div>
+</div>
+
+<!-- Team Modal -->
+<div class="modal" id="teamModal">
+  <div class="modalbox">
+    <h3>Team</h3>
+    <div class="hint" id="teamHint"></div>
+    <div class="color-grid" id="colorGrid"></div>
+    <input id="teamNameInput" placeholder="Team name">
+    <button class="primary" onclick="saveTeam()">Save</button>
+    <button class="danger" onclick="deleteTeam()">Delete Team</button>
+    <button onclick="closeModals()">Cancel</button>
+  </div>
+</div>
+
+<!-- Score Sheet Modal -->
+<div class="modal" id="sheetModal">
+  <div class="modalbox">
+    <h3>Score</h3>
+    <div class="hint" id="sheetHint"></div>
+    <div id="sheetBody"></div>
+    <div class="seclabel">Card Count</div>
+    <div class="cardsgrid">
+      <input id="playedInput" type="number" inputmode="numeric" placeholder="Played (+)">
+      <input id="leftInput" type="number" inputmode="numeric" placeholder="Left (−)">
+    </div>
+    <div class="sheettotal" id="sheetTotal">+0</div>
+    <button class="primary" onclick="applySheet()">Add to Round</button>
+    <button onclick="closeModals()">Cancel</button>
+  </div>
+</div>
+
+<!-- Log Modal -->
+<div class="modal" id="logModal">
+  <div class="modalbox">
+    <h3 id="logTitle">Log</h3>
+    <div class="hint">Tap a round to see what was scored. ✕ removes an entry.</div>
+    <div id="logBody"></div>
+    <div class="logtotal" id="logTotal"></div>
+    <button onclick="closeModals()">Close</button>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal" id="confirmModal">
+  <div class="modalbox">
+    <h3 id="confirmTitle"></h3>
+    <div id="confirmMsg"></div>
+    <button class="primary" id="confirmYes">Yes</button>
+    <button onclick="closeModals()">Cancel</button>
+  </div>
+</div>
+
+<script>
+const KEY="hf_v2";
+const OLD_KEY="hf_final";
+const TEAM_COLORS=["#7A2E28","#1F5C3D","#8C5A1B","#4B3B78","#1E3A5F"];
+
+/* ---------- Rule presets ---------- */
+const DEFAULT_RULES={
+  name:"Squirrel House",
+  clean:500,dirty:300,wild:1500,sevens:1500,
+  red3:-300,red3play:100,goout:100,rounds:4,
+  on:{wild:false,sevens:true,red3:false,red3play:false,goout:false}
+};
+const BUILTIN_PRESETS=[
+  DEFAULT_RULES,
+  {name:"Classic",clean:500,dirty:300,wild:1500,sevens:1500,
+   red3:-300,red3play:100,goout:100,rounds:4,
+   on:{wild:true,sevens:false,red3:true,red3play:false,goout:true}},
+  {name:"High Score",clean:500,dirty:300,wild:1500,sevens:1500,
+   red3:-500,red3play:100,goout:100,rounds:4,
+   on:{wild:false,sevens:false,red3:true,red3play:false,goout:true}},
+  {name:"Five Round",clean:500,dirty:300,wild:1500,sevens:1000,
+   red3:-500,red3play:100,goout:100,rounds:5,
+   on:{wild:true,sevens:true,red3:true,red3play:true,goout:true}}
+];
+
+/* ---------- State ---------- */
+function freshTeam(name,color){
+  return {name,color,total:0,entries:[],history:[]};
+}
+function freshState(){
+  return {
+    round:1,finished:false,
+    rules:JSON.parse(JSON.stringify(DEFAULT_RULES)),
+    savedRules:[],
+    teams:[freshTeam("Team 1","#7A2E28"),freshTeam("Team 2","#1F5C3D")],
+    active:null
+  };
+}
+function migrateOld(old){
+  const s=freshState();
+  if(old.rules){
+    s.rules.clean=old.rules.clean??500;
+    s.rules.dirty=old.rules.dirty??300;
+    s.rules.sevens=old.rules.seven??1500;
+  }
+  s.round=old.round||1;
+  s.teams=(old.teams||[]).map(t=>{
+    const nt=freshTeam(t.name,t.color);
+    nt.total=t.total||0;
+    if(t.round) nt.entries.push({id:eid(),label:"Carried over",pts:t.round});
+    // Represent prior rounds as one summary line each so totals still trace
+    if(nt.total) nt.history.push({n:"1–"+Math.max(1,(old.round||1)-1),total:nt.total,
+      entries:[{id:eid(),label:"Earlier rounds (before update)",pts:nt.total}]});
+    return nt;
+  });
+  if(!s.teams.length) s.teams=freshState().teams;
+  return s;
+}
+let state;
+try{
+  const raw=localStorage.getItem(KEY);
+  if(raw){ state=JSON.parse(raw); }
+  else{
+    const old=localStorage.getItem(OLD_KEY);
+    state=old?migrateOld(JSON.parse(old)):freshState();
+  }
+}catch(e){ state=freshState(); }
+if(!state.rules.on) state.rules.on=JSON.parse(JSON.stringify(DEFAULT_RULES.on));
+if(!state.savedRules) state.savedRules=[];
+
+function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function eid(){return Math.random().toString(36).slice(2,9)}
+function fmt(n){return (n<0?"−":"")+Math.abs(n).toLocaleString()}
+function roundSum(t){return t.entries.reduce((a,e)=>a+e.pts,0)}
+function grand(t){return t.total+roundSum(t)}
+
+/* ---------- Main render ---------- */
+function render(){
+  const r=state.rules;
+  roundLabel.innerHTML=(state.finished
+      ? "Final"
+      : `Round ${state.round} of ${r.rounds}`)
+    +`<span class="ruleset">${r.name||"Custom rules"}</span>`;
+
+  teams.innerHTML="";
+  state.teams.forEach((t,i)=>{
+    const rs=roundSum(t);
+    const row=document.createElement("div");
+    row.className="team";
+    row.style.background=t.color;
+    row.innerHTML=`
+      <div class="name" onclick="openTeam(${i})">${esc(t.name)}
+        <span class="rdlabel">${state.finished?"":"This round: "+fmt(rs)}</span>
+      </div>
+      <div class="score" onclick="openLog(${i})">${fmt(grand(t))}</div>
+      <button class="scorebtn" onclick="openSheet(${i})">SCORE</button>
+    `;
+    teams.appendChild(row);
+  });
+
+  endBtn.textContent = state.round>=state.rules.rounds && !state.finished ? "Finish Game" : "End Round";
+  endBtn.style.display = state.finished ? "none" : "";
+
+  if(state.finished){
+    const ranked=[...state.teams].sort((a,b)=>grand(b)-grand(a));
+    const top=ranked[0], tie=ranked.length>1 && grand(ranked[1])===grand(top);
+    winnerLine.textContent = tie ? "It's a tie!" : `🏆 ${top.name} wins!`;
+    winnerSub.textContent = ranked.map(t=>`${t.name}: ${fmt(grand(t))}`).join("  •  ");
+    gameOver.style.display="block";
+    if(!document.getElementById("newGameBtn")){
+      const b=document.createElement("button");
+      b.id="newGameBtn"; b.textContent="New Game";
+      b.style.cssText="margin-top:10px;border:none;border-radius:14px;padding:14px 20px;font-weight:1000;background:var(--green);color:var(--text)";
+      b.onclick=askNewGame;
+      gameOver.appendChild(b);
+    }
+  }else{
+    gameOver.style.display="none";
+  }
+}
+function esc(s){const d=document.createElement("div");d.textContent=s;return d.innerHTML}
+
+/* ---------- Teams ---------- */
+function addTeam(){
+  const color=TEAM_COLORS[state.teams.length%TEAM_COLORS.length];
+  state.teams.push(freshTeam(`Team ${state.teams.length+1}`,color));
+  save();render();
+}
+function openTeam(i){
+  state.active=i;
+  teamHint.textContent=state.teams[i].name;
+  teamNameInput.value=state.teams[i].name;
+  renderColorGrid();
+  teamModal.style.display="flex";
+}
+function saveTeam(){
+  state.teams[state.active].name=teamNameInput.value.trim()||"Team";
+  save();closeModals();render();
+}
+function deleteTeam(){
+  if(state.teams.length<=1)return;
+  state.teams.splice(state.active,1);
+  save();closeModals();render();
+}
+function renderColorGrid(){
+  colorGrid.innerHTML="";
+  TEAM_COLORS.forEach(c=>{
+    const s=document.createElement("div");
+    s.className="color-swatch"+(state.teams[state.active].color===c?" selected":"");
+    s.style.background=c;
+    s.onclick=()=>{state.teams[state.active].color=c;save();renderColorGrid();render()};
+    colorGrid.appendChild(s);
+  });
+}
+
+/* ---------- Score sheet ---------- */
+let sheet={};
+function sheetLines(){
+  const r=state.rules,L=[];
+  L.push({k:"clean",label:"Clean Book",pts:r.clean});
+  L.push({k:"dirty",label:"Dirty Book",pts:r.dirty});
+  if(r.on.wild)   L.push({k:"wild",label:"Wild Book",pts:r.wild});
+  if(r.on.sevens) L.push({k:"sevens",label:"Clean 7s",pts:r.sevens});
+  if(r.on.red3play)L.push({k:"red3play",label:"Red 3 Played",pts:r.red3play});
+  if(r.on.red3)   L.push({k:"red3",label:"Red 3 Caught",pts:r.red3});
+  return L;
+}
+function openSheet(i){
+  if(state.finished)return;
+  state.active=i;
+  sheet={counts:{},goout:false};
+  sheetHint.textContent=`${state.teams[i].name} — Round ${state.round}`;
+  playedInput.value=""; leftInput.value="";
+  buildSheet();
+  sheetModal.style.display="flex";
+}
+function buildSheet(){
+  const r=state.rules;
+  let html=`<div class="seclabel">Books &amp; Bonuses</div>`;
+  sheetLines().forEach(l=>{
+    const c=sheet.counts[l.k]||0;
+    html+=`
+    <div class="steprow">
+      <div class="lab">${l.label}<small>${l.pts>=0?"+":""}${fmt(l.pts)} each</small></div>
+      <button class="stepbtn" onclick="bump('${l.k}',-1)">−</button>
+      <div class="count" id="cnt_${l.k}">${c}</div>
+      <button class="stepbtn" onclick="bump('${l.k}',1)">+</button>
+    </div>`;
+  });
+  if(r.on.goout){
+    html+=`
+    <div class="togglerow${sheet.goout?" on":""}" id="gooutRow" onclick="toggleGoOut()">
+      <div class="box">${sheet.goout?"✓":""}</div>
+      <div class="lab">Went Out First<small>+${fmt(r.goout)}</small></div>
+    </div>`;
+  }
+  sheetBody.innerHTML=html;
+  updateSheetTotal();
+}
+function bump(k,d){
+  sheet.counts[k]=Math.max(0,(sheet.counts[k]||0)+d);
+  document.getElementById("cnt_"+k).textContent=sheet.counts[k];
+  updateSheetTotal();
+}
+function toggleGoOut(){
+  sheet.goout=!sheet.goout;
+  const row=document.getElementById("gooutRow");
+  row.classList.toggle("on",sheet.goout);
+  row.querySelector(".box").textContent=sheet.goout?"✓":"";
+  updateSheetTotal();
+}
+function sheetSum(){
+  const r=state.rules;
+  let sum=0;
+  sheetLines().forEach(l=>{ sum+=(sheet.counts[l.k]||0)*l.pts; });
+  if(r.on.goout&&sheet.goout) sum+=r.goout;
+  sum+=(+playedInput.value||0)-(+leftInput.value||0);
+  return sum;
+}
+function updateSheetTotal(){
+  const s=sheetSum();
+  sheetTotal.textContent=(s>=0?"+":"")+fmt(s);
+  sheetTotal.classList.toggle("neg",s<0);
+}
+playedInput.addEventListener("input",updateSheetTotal);
+leftInput.addEventListener("input",updateSheetTotal);
+
+function applySheet(){
+  const r=state.rules,t=state.teams[state.active];
+  sheetLines().forEach(l=>{
+    const c=sheet.counts[l.k]||0;
+    if(c) t.entries.push({id:eid(),label:c>1?`${l.label} ×${c}`:l.label,pts:c*l.pts});
+  });
+  if(r.on.goout&&sheet.goout) t.entries.push({id:eid(),label:"Went out first",pts:r.goout});
+  const p=+playedInput.value||0, lft=+leftInput.value||0;
+  if(p) t.entries.push({id:eid(),label:"Cards played",pts:p});
+  if(lft) t.entries.push({id:eid(),label:"Cards left",pts:-lft});
+  save();closeModals();render();
+}
+
+/* ---------- Log ---------- */
+function openLog(i){
+  state.active=i;
+  const t=state.teams[i];
+  logTitle.textContent=t.name;
+  let html="";
+
+  // current round
+  const rs=roundSum(t);
+  html+=`<div class="loground open">
+    <div class="loghead"><div class="rt">Round ${state.round}${state.finished?"":" (current)"}</div>
+    <div class="pts">${fmt(rs)}</div></div>
+    <div class="logentries">${t.entries.length?t.entries.map(e=>entryHTML(e,true)).join("")
+      :`<div class="logempty">Nothing scored yet</div>`}</div>
+  </div>`;
+
+  // past rounds, newest first
+  [...t.history].reverse().forEach(h=>{
+    html+=`<div class="loground" onclick="this.classList.toggle('open')">
+      <div class="loghead"><div class="rt">Round ${h.n}</div>
+      <div class="pts">${fmt(h.total)}</div><div class="chev">▾</div></div>
+      <div class="logentries">${h.entries.length?h.entries.map(e=>entryHTML(e,false)).join("")
+        :`<div class="logempty">Nothing scored</div>`}</div>
+    </div>`;
+  });
+
+  logBody.innerHTML=html;
+  logTotal.textContent=`Total: ${fmt(grand(t))}`;
+  logModal.style.display="flex";
+}
+function entryHTML(e,deletable){
+  return `<div class="logentry">
+    <div class="el">${esc(e.label)}</div>
+    <div class="ep${e.pts<0?" neg":""}">${e.pts>=0?"+":""}${fmt(e.pts)}</div>
+    ${deletable?`<button class="ex" onclick="event.stopPropagation();delEntry('${e.id}')">✕</button>`:""}
+  </div>`;
+}
+function delEntry(id){
+  const t=state.teams[state.active];
+  t.entries=t.entries.filter(e=>e.id!==id);
+  save();render();openLog(state.active);
+}
+
+/* ---------- Round flow ---------- */
+function askResetRound(){
+  confirmDlg("Reset Round?","Clears everything scored this round for all teams.",()=>{
+    state.teams.forEach(t=>t.entries=[]);
+    save();closeModals();render();
+  });
+}
+function askEndRound(){
+  const last=state.round>=state.rules.rounds;
+  confirmDlg(last?"Finish Game?":"End Round "+state.round+"?",
+    last?"Round scores will be banked and the winner declared."
+        :"Round scores will be banked and Round "+(state.round+1)+" will begin.",
+    ()=>{
+      state.teams.forEach(t=>{
+        const rs=roundSum(t);
+        t.history.push({n:state.round,total:rs,entries:t.entries});
+        t.total+=rs; t.entries=[];
+      });
+      if(state.round<state.rules.rounds) state.round++;
+      else state.finished=true;
+      save();closeModals();render();
+    });
+}
+function askNewGame(){
+  confirmDlg("New Game?","Scores and history will be cleared. Teams and rules are kept.",()=>{
+    state.teams.forEach(t=>{t.total=0;t.entries=[];t.history=[]});
+    state.round=1; state.finished=false;
+    const b=document.getElementById("newGameBtn"); if(b)b.remove();
+    save();closeModals();render();
+  });
+}
+function confirmDlg(title,msg,fn){
+  confirmTitle.textContent=title;
+  confirmMsg.textContent=msg;
+  confirmYes.onclick=fn;
+  confirmModal.style.display="flex";
+}
+
+/* ---------- Rules ---------- */
+let draft=null; // working copy while modal open
+function openRules(){
+  draft=JSON.parse(JSON.stringify(state.rules));
+  fillRuleInputs();
+  renderPresets();
+  ruleNameInput.value="";
+  rulesModal.style.display="flex";
+}
+function fillRuleInputs(){
+  r_clean.value=draft.clean; r_dirty.value=draft.dirty;
+  r_wild.value=draft.wild; r_sevens.value=draft.sevens;
+  r_red3.value=draft.red3; r_red3play.value=draft.red3play;
+  r_goout.value=draft.goout; r_rounds.value=draft.rounds;
+  syncToggles();
+}
+function syncToggles(){
+  [["wild","row_wild"],["sevens","row_sevens"],["red3","row_red3"],
+   ["red3play","row_red3play"],["goout","row_goout"]].forEach(([k,rowId])=>{
+    const row=document.getElementById(rowId);
+    const btn=row.querySelector(".onoff");
+    const on=!!draft.on[k];
+    btn.textContent=on?"ON":"OFF";
+    btn.classList.toggle("on",on);
+    row.classList.toggle("disabled",!on);
+  });
+}
+function toggleRule(k){
+  readRuleInputs();
+  draft.on[k]=!draft.on[k];
+  syncToggles();
+}
+function readRuleInputs(){
+  draft.clean=+r_clean.value||0; draft.dirty=+r_dirty.value||0;
+  draft.wild=+r_wild.value||0; draft.sevens=+r_sevens.value||0;
+  draft.red3=+r_red3.value||0; draft.red3play=+r_red3play.value||0;
+  draft.goout=+r_goout.value||0;
+  draft.rounds=Math.max(1,Math.min(10,+r_rounds.value||4));
+}
+function allPresets(){return [...BUILTIN_PRESETS,...state.savedRules]}
+function renderPresets(){
+  presetWrap.innerHTML="";
+  allPresets().forEach((p,idx)=>{
+    const custom=idx>=BUILTIN_PRESETS.length;
+    const b=document.createElement("button");
+    b.className="preset"+(draft.name===p.name?" selected":"");
+    b.textContent=p.name;
+    b.onclick=()=>{draft=JSON.parse(JSON.stringify(p));fillRuleInputs();renderPresets()};
+    if(custom){
+      let timer;
+      b.addEventListener("touchstart",()=>{timer=setTimeout(()=>delPreset(p.name),700)});
+      b.addEventListener("touchend",()=>clearTimeout(timer));
+      b.addEventListener("touchmove",()=>clearTimeout(timer));
+      b.addEventListener("contextmenu",ev=>{ev.preventDefault();delPreset(p.name)});
+    }
+    presetWrap.appendChild(b);
+  });
+}
+function delPreset(name){
+  confirmDlg("Delete rule set?",`"${name}" will be removed from saved rule sets.`,()=>{
+    state.savedRules=state.savedRules.filter(p=>p.name!==name);
+    save();
+    confirmModal.style.display="none";
+    renderPresets();
+  });
+}
+function saveRuleSet(){
+  readRuleInputs();
+  const name=ruleNameInput.value.trim();
+  if(!name)return;
+  draft.name=name;
+  state.savedRules=state.savedRules.filter(p=>p.name!==name);
+  state.savedRules.push(JSON.parse(JSON.stringify(draft)));
+  save();
+  ruleNameInput.value="";
+  renderPresets();
+}
+function applyRules(){
+  readRuleInputs();
+  // If the values no longer match any named set, mark the name as edited
+  const base=(draft.name||"").replace(/ \(edited\)$/,"");
+  const src=allPresets().find(p=>p.name===base);
+  const same=src&&JSON.stringify({...src,name:""})===JSON.stringify({...draft,name:""});
+  draft.name=same?base:(base?base+" (edited)":"Custom");
+  state.rules=draft;
+  save();closeModals();render();
+}
+
+/* ---------- Misc ---------- */
+function closeModals(){
+  ["rulesModal","teamModal","sheetModal","logModal","confirmModal"].forEach(id=>{
+    document.getElementById(id).style.display="none";
+  });
+}
+
+render();
+</script>
+
+</body>
+</html>
