@@ -1,14 +1,14 @@
 {
-  "name": "Hand & Foot",
-  "short_name": "Hand & Foot",
+  "name": "NeutzCox Hand & Foot",
+  "short_name": "NeutzCox",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0c1226",
-  "theme_color": "#0c1226",
+  "background_color": "#12091f",
+  "theme_color": "#12091f",
   "icons": [
     {
-      "src": "./apple-touch-icon.png",
+      "src": "./neutzcox-icon.png",
       "sizes": "180x180",
       "type": "image/png"
     }
