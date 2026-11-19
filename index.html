@@ -62,7 +62,7 @@ main{padding-bottom:calc(env(safe-area-inset-bottom) + 20px)}
 .round .ruleset{
   min-width:0;color:var(--accent);font-size:.75rem;font-weight:650;text-align:right;overflow-wrap:anywhere;
 }
-.top-actions button,.controls button,.scorebtn,.gameover button,.modalbox button{
+.top-actions button,.controls button,.gameover button,.modalbox button{
   min-height:44px;border:1px solid var(--line);border-radius:12px;
   background:var(--glass);padding:8px 10px;font-size:.86rem;font-weight:650;
 }
@@ -72,24 +72,28 @@ main{padding-bottom:calc(env(safe-area-inset-bottom) + 20px)}
   background:linear-gradient(135deg,var(--accent),#a8d9ff);
   border-color:transparent;color:#101d32;font-weight:750;
 }
-.list{display:grid;gap:10px}
+.list{display:grid;gap:12px}
 .team{
-  display:grid;grid-template-columns:minmax(0,1fr) minmax(64px,auto) auto;align-items:center;
-  gap:clamp(6px,2vw,12px);min-width:0;border-radius:18px;padding:10px 11px;
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(108px,46%);align-items:center;
+  gap:12px;min-width:0;border-radius:19px;padding:12px 14px;
   border-inline-start:3px solid var(--team-color,#a4b9fb);
   background:linear-gradient(120deg,color-mix(in srgb,var(--team-color,#a4b9fb) 21%,#202b49),#182640b8 85%);
 }
-.name,.score{
-  border:0;background:transparent;padding:5px 0;min-height:44px;min-width:0;
-  overflow-wrap:anywhere;font-weight:700;
+.team-details{min-width:0}
+.name,.score,.team-log{
+  border:0;background:transparent;min-width:0;overflow-wrap:anywhere;font-weight:700;
 }
-.name{text-align:left;font-size:clamp(.88rem,3.7vw,1.08rem)}
-.name .rdlabel{display:block;margin-top:4px;color:var(--muted);font-weight:550;font-size:.72rem}
+.name{min-height:32px;text-align:left;padding:3px 0;font-size:clamp(.92rem,3.7vw,1.13rem)}
+.rdlabel{display:block;margin-top:2px;color:var(--muted);font-weight:550;font-size:.77rem;overflow-wrap:anywhere}
+.team-log{display:block;min-height:44px;padding:4px 10px;margin:0 0 -6px -10px;color:var(--violet);font-size:.74rem}
 .score{
-  text-align:right;font-variant-numeric:tabular-nums;font-size:clamp(1.02rem,5vw,1.6rem);
-  letter-spacing:-.04em;max-width:30vw;
+  display:grid;place-items:center;width:100%;min-height:84px;padding:9px 4px;
+  border:1px solid var(--line);border-radius:14px;background:#a6dcfb16;color:var(--accent);
+  font-variant-numeric:tabular-nums;font-size:clamp(1.65rem,8vw,2.6rem);
+  line-height:1;letter-spacing:-.055em;
 }
-.scorebtn{color:var(--accent);padding-inline:clamp(8px,3vw,14px)}
+.score span{max-width:100%}
+.score small{margin-top:5px;font-size:.68rem;font-weight:650;letter-spacing:.01em;color:var(--muted)}
 .gameover{display:none;margin-top:14px;border-radius:18px;padding:16px;text-align:center;overflow-wrap:anywhere}
 .gameover .win{font-size:1.25rem;font-weight:750;margin-bottom:5px}
 .gameover .sub{color:var(--muted);font-size:.86rem}
@@ -456,11 +460,15 @@ function render(){
     row.className="team";
     row.style.setProperty("--team-color",t.color);
     row.innerHTML=`
-      <button class="name" onclick="openTeam(${i})">${esc(t.name)}
-        <span class="rdlabel">${state.finished?"":"This round: "+fmt(rs)}</span>
+      <div class="team-details">
+        <button class="name" onclick="openTeam(${i})">${esc(t.name)}</button>
+        ${state.finished?"":`<span class="rdlabel">This round: ${fmt(rs)}</span>
+        <button class="team-log" onclick="openLog(${i})">Log</button>`}
+      </div>
+      <button class="score" onclick="${state.finished?"openLog":"openSheet"}(${i})">
+        <span>${fmt(grand(t))}</span>
+        <small>${state.finished?"View log":"Tap to score"}</small>
       </button>
-      <button class="score" onclick="openLog(${i})" title="View score log">${fmt(grand(t))}</button>
-      <button class="scorebtn" onclick="openSheet(${i})" ${state.finished?"disabled":""}>Score</button>
     `;
     teams.appendChild(row);
   });
