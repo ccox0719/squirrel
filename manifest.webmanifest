@@ -4,8 +4,8 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#12091f",
-  "theme_color": "#12091f",
+  "background_color": "#070709",
+  "theme_color": "#070709",
   "icons": [
     {
       "src": "./neutzcox-icon.png",
