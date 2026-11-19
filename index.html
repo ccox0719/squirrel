@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>NeutzCox Hand &amp; Foot</title>
+<title>Hand &amp; Foot</title>
 <meta name="theme-color" content="#070709">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="NeutzCox">
 <link rel="apple-touch-icon" sizes="180x180" href="./neutzcox-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -48,7 +49,7 @@ header{padding-top:calc(env(safe-area-inset-top) + clamp(18px,5vw,32px));padding
 }
 main{padding-bottom:calc(env(safe-area-inset-bottom) + 20px)}
 .topbar{display:grid;gap:11px;margin-bottom:14px}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--bg)}
 .app-menu{flex:none;position:relative;z-index:5}
 .app-menu summary{
   display:flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:0 11px;
@@ -75,9 +76,6 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .round{
   min-width:0;display:flex;align-items:center;justify-content:space-between;gap:10px;
   border-radius:15px;padding:13px 14px;font-weight:700;font-size:.9rem;
-}
-.round .ruleset{
-  min-width:0;color:var(--accent);font-size:.75rem;font-weight:650;text-align:right;overflow-wrap:anywhere;
 }
 .menu-items button,.controls button,.gameover button,.modalbox button{
   min-height:44px;border:1px solid var(--line);border-radius:12px;
@@ -228,9 +226,9 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px}
   .modalbox{background:var(--panel)}
 }
 /* Neon score tiles share a palette with the landscape display. */
-.brand-name{line-height:1.02}
-.brand-name small{display:block;margin-top:5px;color:var(--muted);font-size:.72rem;font-weight:650;letter-spacing:.035em}
-.icon{object-fit:cover;box-shadow:0 0 16px #ff5ea03d;border-color:#ff99d858}
+.brand-name{min-width:0;line-height:1.02}
+.brand-name small{display:block;margin-top:5px;color:var(--muted);font-size:.72rem;font-weight:650;letter-spacing:.035em;overflow-wrap:anywhere}
+.icon{object-fit:cover;box-shadow:none;border-color:#ff99d858}
 .team{
   --tile:linear-gradient(140deg,#fff878,#42f7d8);
   --glow:#43ead03b;
@@ -257,7 +255,7 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px}
 <body>
 
 <header>
-  <div class="htitle"><img class="icon" src="./neutzcox-icon.png" width="44" height="44" alt=""><span class="brand-name">NeutzCox<small>Hand &amp; Foot</small></span></div>
+  <div class="htitle"><img class="icon" src="./neutzcox-icon.png" width="44" height="44" alt=""><span class="brand-name">Hand &amp; Foot<small id="activeRuleName"></small></span></div>
   <details class="app-menu" id="appMenu">
     <summary>Menu <span class="menu-chevron" aria-hidden="true"></span></summary>
     <nav class="menu-items" aria-label="Game controls">
@@ -297,6 +295,8 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px}
     <div class="seclabel">Rule Sets</div>
     <div class="hint" style="margin-bottom:8px">Tap to load. Hold to delete a saved set.</div>
     <div class="presetwrap" id="presetWrap"></div>
+    <label class="seclabel" for="ruleNameInput" style="display:block">Rule set name</label>
+    <input id="ruleNameInput" maxlength="80" placeholder="Custom rules">
 
     <div class="seclabel">Books</div>
     <div class="rulerow">
@@ -341,8 +341,6 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px}
       <input id="r_rounds" type="number" min="1" max="10">
     </div>
 
-    <div class="seclabel">Save</div>
-    <input id="ruleNameInput" placeholder="Rule set name (e.g. Grandma's House)">
     <button onclick="saveRuleSet()">Save as Rule Set</button>
     <button class="primary" onclick="applyRules()">Apply &amp; Close</button>
     <button onclick="closeModals()">Cancel</button>
@@ -520,10 +518,8 @@ function grand(t){return t.total+roundSum(t)}
 /* ---------- Main render ---------- */
 function render(){
   const r=state.rules;
-  roundLabel.innerHTML=(state.finished
-      ? "Final"
-      : `Round ${state.round} of ${r.rounds}`)
-    +`<span class="ruleset">${r.name||"Custom rules"}</span>`;
+  roundLabel.textContent=state.finished ? "Final" : `Round ${state.round} of ${r.rounds}`;
+  document.getElementById("activeRuleName").textContent=r.name||"Custom rules";
 
   teams.innerHTML="";
   state.teams.forEach((t,i)=>{
@@ -923,10 +919,10 @@ function openRules(){
   draft=JSON.parse(JSON.stringify(state.rules));
   fillRuleInputs();
   renderPresets();
-  ruleNameInput.value="";
   rulesModal.style.display="flex";
 }
 function fillRuleInputs(){
+  ruleNameInput.value=draft.name||"";
   r_clean.value=draft.clean; r_dirty.value=draft.dirty;
   r_wild.value=draft.wild; r_sevens.value=draft.sevens;
   r_red3.value=draft.red3; r_red3play.value=draft.red3play;
@@ -991,16 +987,11 @@ function saveRuleSet(){
   state.savedRules=state.savedRules.filter(p=>p.name!==name);
   state.savedRules.push(JSON.parse(JSON.stringify(draft)));
   save();
-  ruleNameInput.value="";
   renderPresets();
 }
 function applyRules(){
   readRuleInputs();
-  // If the values no longer match any named set, mark the name as edited
-  const base=(draft.name||"").replace(/ \(edited\)$/,"");
-  const src=allPresets().find(p=>p.name===base);
-  const same=src&&JSON.stringify({...src,name:""})===JSON.stringify({...draft,name:""});
-  draft.name=same?base:(base?base+" (edited)":"Custom");
+  draft.name=ruleNameInput.value.trim()||"Custom rules";
   state.rules=draft;
   save();closeModals();render();
 }
