@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hand &amp; Foot</title>
+<meta name="theme-color" content="#123526">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Hand &amp; Foot">
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+<link rel="manifest" href="./manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -340,6 +345,11 @@ main{
 #confirmMsg{
   text-align:center;font-weight:600;margin-bottom:16px;line-height:1.5;color:var(--ink-soft);
 }
+.top-actions{display:flex;gap:4px}
+.top-actions button{padding-inline:clamp(7px,2vw,12px)}
+.stats-team{background:var(--cream);border:1px solid var(--border);border-radius:10px;padding:10px;margin:8px 0;overflow-wrap:anywhere}
+.stats-team strong{display:block;margin-bottom:4px}
+.stats-team div{color:var(--ink-soft);font-size:.85rem}
 </style>
 </head>
 
@@ -355,7 +365,10 @@ main{
 <div class="topbar">
   <button onclick="addTeam()">+ Team</button>
   <div class="round" id="roundLabel"></div>
-  <button class="rules" onclick="openRules()">Rules</button>
+  <div class="top-actions">
+    <button class="rules" onclick="openRules()">Rules</button>
+    <button class="rules" onclick="openStats()">Stats</button>
+  </div>
 </div>
 
 <div class="list" id="teams"></div>
@@ -469,6 +482,15 @@ main{
     <div class="hint">Tap a round to see what was scored. ✕ removes an entry.</div>
     <div id="logBody"></div>
     <div class="logtotal" id="logTotal"></div>
+    <button onclick="closeModals()">Close</button>
+  </div>
+</div>
+
+<div class="modal" id="statsModal">
+  <div class="modalbox" role="dialog" aria-modal="true" aria-labelledby="statsTitle">
+    <h3 id="statsTitle">Team Stats</h3>
+    <div class="hint" id="statsSummary"></div>
+    <div id="statsBody"></div>
     <button onclick="closeModals()">Close</button>
   </div>
 </div>
@@ -710,7 +732,11 @@ function updateSheetTotal(){
 playedInput.addEventListener("input",updateSheetTotal);
 leftInput.addEventListener("input",updateSheetTotal);
 
+function roundReady(){
+  return state.teams.every(t=>t.entries.length>0 || t.zeroScore===true);
+}
 function applySheet(){
+  const wasReady=roundReady();
   const r=state.rules,t=state.teams[state.active];
   sheetLines().forEach(l=>{
     const c=sheet.counts[l.k]||0;
@@ -720,7 +746,9 @@ function applySheet(){
   const p=+playedInput.value||0, lft=+leftInput.value||0;
   if(p) t.entries.push({id:eid(),label:"Cards played",pts:p});
   if(lft) t.entries.push({id:eid(),label:"Cards left",pts:-lft});
+  if(!t.entries.length && (playedInput.value!=="" || leftInput.value!=="")) t.zeroScore=true;
   save();closeModals();render();
+  if(!wasReady && roundReady()) askEndRound();
 }
 
 /* ---------- Log ---------- */
@@ -769,11 +797,12 @@ function delEntry(id){
 /* ---------- Round flow ---------- */
 function askResetRound(){
   confirmDlg("Reset Round?","Clears everything scored this round for all teams.",()=>{
-    state.teams.forEach(t=>t.entries=[]);
+    state.teams.forEach(t=>{t.entries=[];delete t.zeroScore});
     save();closeModals();render();
   });
 }
 function askEndRound(){
+  if(state.finished)return;
   const last=state.round>=state.rules.rounds;
   confirmDlg(last?"Finish Game?":"End Round "+state.round+"?",
     last?"Round scores will be banked and the winner declared."
@@ -783,15 +812,20 @@ function askEndRound(){
         const rs=roundSum(t);
         t.history.push({n:state.round,total:rs,entries:t.entries});
         t.total+=rs; t.entries=[];
+        delete t.zeroScore;
       });
       if(state.round<state.rules.rounds) state.round++;
-      else state.finished=true;
+      else{
+        state.finished=true;
+        recordFinishedGame();
+      }
       save();closeModals();render();
     });
 }
 function askNewGame(){
-  confirmDlg("New Game?","Scores and history will be cleared. Teams and rules are kept.",()=>{
-    state.teams.forEach(t=>{t.total=0;t.entries=[];t.history=[]});
+  confirmDlg("New Game?","Start fresh with the same teams and rules. Completed games are saved in Team Stats.",()=>{
+    state.teams.forEach(t=>{t.total=0;t.entries=[];t.history=[];delete t.zeroScore});
+    delete state.resultRecorded;
     state.round=1; state.finished=false;
     const b=document.getElementById("newGameBtn"); if(b)b.remove();
     save();closeModals();render();
@@ -802,6 +836,53 @@ function confirmDlg(title,msg,fn){
   confirmMsg.textContent=msg;
   confirmYes.onclick=fn;
   confirmModal.style.display="flex";
+}
+
+/* ---------- Team stats ---------- */
+function recordFinishedGame(){
+  if(state.resultRecorded)return;
+  const scores=state.teams.map(t=>({name:t.name,score:grand(t)}));
+  (state.completedGames??=[]).push(scores);
+  state.resultRecorded=true;
+}
+function teamKey(name){return name.trim().replace(/\s+/g," ").toLowerCase()}
+function compileStats(games){
+  const stats=new Map();
+  games.forEach(scores=>{
+    const high=Math.max(...scores.map(t=>t.score));
+    const leaders=scores.filter(t=>t.score===high).length;
+    const byName=new Map();
+    scores.forEach(t=>{
+      const key=teamKey(t.name);
+      if(!byName.has(key) || byName.get(key).score<t.score) byName.set(key,t);
+    });
+    byName.forEach(({name,score},key)=>{
+      const row=stats.get(key)??{name,played:0,wins:0,ties:0,points:0,best:score};
+      row.name=name;
+      row.played++;
+      if(score===high){
+        if(leaders===1) row.wins++;
+        else row.ties++;
+      }
+      row.points+=score;
+      row.best=Math.max(row.best,score);
+      stats.set(key,row);
+    });
+  });
+  return [...stats.values()].sort((a,b)=>b.wins-a.wins || b.best-a.best || a.name.localeCompare(b.name));
+}
+function openStats(){
+  const games=state.completedGames??[];
+  statsSummary.textContent=games.length
+    ? `${games.length} completed ${games.length===1?"game":"games"} on this device`
+    : "Finish a game to start tracking team stats on this device.";
+  statsBody.innerHTML=compileStats(games).map(t=>`
+    <div class="stats-team">
+      <strong>${esc(t.name)}</strong>
+      <div>${t.wins} won · ${t.played-t.wins-t.ties} lost · ${t.ties} tied · ${t.played} played</div>
+      <div>${Math.round(100*t.wins/t.played)}% win rate · Best ${fmt(t.best)} · Avg ${fmt(Math.round(t.points/t.played))}</div>
+    </div>`).join("");
+  document.getElementById("statsModal").style.display="flex";
 }
 
 /* ---------- Rules ---------- */
@@ -894,11 +975,15 @@ function applyRules(){
 
 /* ---------- Misc ---------- */
 function closeModals(){
-  ["rulesModal","teamModal","sheetModal","logModal","confirmModal"].forEach(id=>{
+  ["rulesModal","teamModal","sheetModal","logModal","confirmModal","statsModal"].forEach(id=>{
     document.getElementById(id).style.display="none";
   });
 }
 
+if(state.finished && !state.resultRecorded){
+  recordFinishedGame();
+  save();
+}
 render();
 </script>
 

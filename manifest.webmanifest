@@ -1,0 +1,16 @@
+{
+  "name": "Hand & Foot",
+  "short_name": "Hand & Foot",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#123526",
+  "theme_color": "#123526",
+  "icons": [
+    {
+      "src": "./apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
