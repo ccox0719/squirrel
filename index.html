@@ -346,7 +346,12 @@ main{
   text-align:center;font-weight:600;margin-bottom:16px;line-height:1.5;color:var(--ink-soft);
 }
 .top-actions{display:flex;gap:4px}
-.top-actions button{padding-inline:clamp(7px,2vw,12px)}
+.top-actions button{padding-inline:clamp(6px,1.6vw,12px)}
+.game-list{margin:12px 0}
+.game-list button{text-align:left;overflow-wrap:anywhere}
+.game-list small{display:block;margin-top:4px;color:var(--ink-soft)}
+#cloudPanel{margin-block:14px;padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--cream)}
+#gameStatus:empty{display:none}
 .stats-team{background:var(--cream);border:1px solid var(--border);border-radius:10px;padding:10px;margin:8px 0;overflow-wrap:anywhere}
 .stats-team strong{display:block;margin-bottom:4px}
 .stats-team div{color:var(--ink-soft);font-size:.85rem}
@@ -368,6 +373,7 @@ main{
   <div class="top-actions">
     <button class="rules" onclick="openRules()">Rules</button>
     <button class="rules" onclick="openStats()">Stats</button>
+    <button class="rules" onclick="openGames()">Games</button>
   </div>
 </div>
 
@@ -486,6 +492,31 @@ main{
   </div>
 </div>
 
+<div class="modal" id="gamesModal">
+  <div class="modalbox" role="dialog" aria-modal="true" aria-labelledby="gamesTitle">
+    <h3 id="gamesTitle">Saved Games</h3>
+    <div class="hint" id="gameStatus" role="status"></div>
+    <form id="saveGameForm">
+      <input id="gameName" aria-label="Game name" placeholder="Game name" maxlength="80" required>
+      <button class="primary" type="submit">Save This Game</button>
+    </form>
+    <button onclick="closeModals();askNewGame()">New Game</button>
+    <div class="game-list" id="gameList"></div>
+    <section id="cloudPanel" aria-label="Cloud backup">
+      <div class="hint" id="cloudStatus" role="status">Loading cloud backup…</div>
+      <form id="cloudAuthForm" hidden>
+        <input id="cloudEmail" type="email" autocomplete="username" aria-label="Email" placeholder="Email" required>
+        <input id="cloudPassword" type="password" autocomplete="current-password" aria-label="Password" placeholder="Password" required>
+        <button type="submit" value="signin">Sign In</button>
+        <button type="submit" value="signup">Create Account</button>
+      </form>
+      <button id="cloudSyncButton" type="button" hidden>Sync Now</button>
+      <button id="cloudSignOut" type="button" hidden>Sign Out</button>
+    </section>
+    <button onclick="closeModals()">Close</button>
+  </div>
+</div>
+
 <div class="modal" id="statsModal">
   <div class="modalbox" role="dialog" aria-modal="true" aria-labelledby="statsTitle">
     <h3 id="statsTitle">Team Stats</h3>
@@ -575,7 +606,10 @@ try{
 if(!state.rules.on) state.rules.on=JSON.parse(JSON.stringify(DEFAULT_RULES.on));
 if(!state.savedRules) state.savedRules=[];
 
-function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function save(){
+  localStorage.setItem(KEY,JSON.stringify(state));
+  window.dispatchEvent(new Event("squirrel-change"));
+}
 function eid(){return Math.random().toString(36).slice(2,9)}
 function fmt(n){return (n<0?"−":"")+Math.abs(n).toLocaleString()}
 function roundSum(t){return t.entries.reduce((a,e)=>a+e.pts,0)}
@@ -823,8 +857,11 @@ function askEndRound(){
     });
 }
 function askNewGame(){
-  confirmDlg("New Game?","Start fresh with the same teams and rules. Completed games are saved in Team Stats.",()=>{
+  confirmDlg("New Game?","Start fresh with the same teams and rules. Any scored game will be saved.",()=>{
+    archiveCurrentGame();
     state.teams.forEach(t=>{t.total=0;t.entries=[];t.history=[];delete t.zeroScore});
+    state.gameId=newGameId();
+    delete state.gameName;
     delete state.resultRecorded;
     state.round=1; state.finished=false;
     const b=document.getElementById("newGameBtn"); if(b)b.remove();
@@ -838,11 +875,94 @@ function confirmDlg(title,msg,fn){
   confirmModal.style.display="flex";
 }
 
+/* ---------- Saved games ---------- */
+let cloudBackups=[];
+function newGameId(){return crypto.randomUUID()}
+function gameLabel(){return state.teams.map(t=>t.name).join(" vs ").slice(0,80)}
+function hasGameProgress(){
+  return state.finished || state.round>1 || state.teams.some(t=>t.entries.length || t.history.length || t.zeroScore);
+}
+function currentGame(){
+  const {gameId,gameName,round,finished,rules,teams}=state;
+  return {gameId,gameName:gameName||gameLabel(),round,finished,rules,teams};
+}
+function archiveCurrentGame(name){
+  if(name) state.gameName=name;
+  if(!state.gameName && !hasGameProgress())return;
+  const snapshot=JSON.parse(JSON.stringify(currentGame()));
+  snapshot.savedAt=new Date().toISOString();
+  (state.savedGames??={})[snapshot.gameId]=snapshot;
+}
+function refreshGameList(){
+  const list=document.getElementById("gameList");
+  list.replaceChildren();
+  function addGame(game,source){
+    const button=document.createElement("button");
+    button.type="button";
+    button.textContent=game.gameName;
+    const details=document.createElement("small");
+    const date=game.savedAt ? " · "+new Date(game.savedAt).toLocaleString() : "";
+    details.textContent=(game.finished?"Completed":"Round "+game.round+" of "+game.rules.rounds)+" · "+source+date;
+    button.append(details);
+    button.onclick=()=>loadGame(game,source.startsWith("Cloud"));
+    list.append(button);
+  }
+  const local=Object.values(state.savedGames??{}).sort((a,b)=>b.savedAt.localeCompare(a.savedAt));
+  local.forEach(game=>{
+    if(game.gameId===state.gameId && !game.checkpoint){
+      addGame({...currentGame(),savedAt:game.savedAt},"Saved on this device · current game");
+    }else addGame(game,"Saved on this device");
+  });
+  cloudBackups.forEach(({ledger,updated_at})=>{
+    const games={...ledger.savedGames};
+    if(ledger.current) games[ledger.current.gameId]={...ledger.current,savedAt:updated_at};
+    Object.values(games).forEach(game=>addGame(game,"Cloud · another device"));
+  });
+  if(!list.children.length) list.textContent="Saved and completed games will appear here.";
+}
+function openGames(){
+  document.getElementById("gameName").value=state.gameName||gameLabel();
+  document.getElementById("gameStatus").textContent="";
+  refreshGameList();
+  document.getElementById("gamesModal").style.display="flex";
+  window.dispatchEvent(new Event("squirrel-check-cloud"));
+}
+function loadGame(game,fromCloud){
+  confirmDlg(game.finished?"View this game?":"Open this game?",
+    "Any scored game on this screen will be saved before switching.",()=>{
+      archiveCurrentGame();
+      if(fromCloud && state.savedGames?.[game.gameId]){
+        const local=state.savedGames[game.gameId];
+        if(JSON.stringify(local.teams)!==JSON.stringify(game.teams) || local.round!==game.round){
+          state.savedGames[newGameId()]={...local,checkpoint:true,gameName:local.gameName+" (local copy)"};
+        }
+      }
+      const {gameId,gameName,round,finished,rules,teams}=JSON.parse(JSON.stringify(game));
+      Object.assign(state,{gameId,gameName,round,finished,rules,teams,active:null,resultRecorded:false});
+      if(finished) recordFinishedGame();
+      save();closeModals();render();
+    });
+}
+document.getElementById("saveGameForm").addEventListener("submit",event=>{
+  event.preventDefault();
+  const name=document.getElementById("gameName").value.trim();
+  if(!name)return;
+  archiveCurrentGame(name);
+  save();refreshGameList();
+  document.getElementById("gameStatus").textContent="Saved on this device. See cloud backup status below.";
+});
+function cloudLedger(){
+  return {current:(state.gameName||hasGameProgress())?currentGame():null,
+    savedGames:state.savedGames??{},completedGames:state.completedGames??[]};
+}
+
 /* ---------- Team stats ---------- */
 function recordFinishedGame(){
   if(state.resultRecorded)return;
   const scores=state.teams.map(t=>({name:t.name,score:grand(t)}));
-  (state.completedGames??=[]).push(scores);
+  const results=state.completedGames??=[];
+  if(!results.some(game=>game.id===state.gameId)) results.push({id:state.gameId,scores});
+  archiveCurrentGame();
   state.resultRecorded=true;
 }
 function teamKey(name){return name.trim().replace(/\s+/g," ").toLowerCase()}
@@ -872,10 +992,13 @@ function compileStats(games){
   return [...stats.values()].sort((a,b)=>b.wins-a.wins || b.best-a.best || a.name.localeCompare(b.name));
 }
 function openStats(){
-  const games=state.completedGames??[];
+  const results=new Map();
+  [...cloudBackups.flatMap(b=>b.ledger.completedGames??[]),...(state.completedGames??[])]
+    .forEach(game=>results.set(game.id,game.scores));
+  const games=[...results.values()];
   statsSummary.textContent=games.length
-    ? `${games.length} completed ${games.length===1?"game":"games"} on this device`
-    : "Finish a game to start tracking team stats on this device.";
+    ? `${games.length} completed ${games.length===1?"game":"games"} recorded`
+    : "Finish a game to start tracking team stats.";
   statsBody.innerHTML=compileStats(games).map(t=>`
     <div class="stats-team">
       <strong>${esc(t.name)}</strong>
@@ -975,17 +1098,27 @@ function applyRules(){
 
 /* ---------- Misc ---------- */
 function closeModals(){
-  ["rulesModal","teamModal","sheetModal","logModal","confirmModal","statsModal"].forEach(id=>{
+  ["rulesModal","teamModal","sheetModal","logModal","confirmModal","statsModal","gamesModal"].forEach(id=>{
     document.getElementById(id).style.display="none";
   });
 }
 
-if(state.finished && !state.resultRecorded){
-  recordFinishedGame();
+if(!state.gameId){
+  state.gameId=newGameId();
+  const oldResults=state.completedGames??[];
+  state.completedGames=oldResults.map((scores,i)=>({
+    id:state.finished && i===oldResults.length-1 ? state.gameId : newGameId(),scores
+  }));
+  if(state.finished){
+    if(!state.resultRecorded) recordFinishedGame();
+    archiveCurrentGame();
+  }
   save();
 }
 render();
 </script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0"></script>
+<script defer src="./cloud.js"></script>
 
 </body>
 </html>
