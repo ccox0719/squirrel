@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>NeutzCox Hand &amp; Foot</title>
-<meta name="theme-color" content="#12091f">
+<meta name="theme-color" content="#0b0513">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="NeutzCox">
 <link rel="apple-touch-icon" sizes="180x180" href="./neutzcox-icon.png">
@@ -12,13 +12,13 @@
 <style>
 :root{
   color-scheme:dark;
-  --bg:#12091f;
+  --bg:#0b0513;
   --panel:#241331;
   --text:#f5f7ff;
   --muted:#d4c4dc;
   --line:#df9aff38;
   --glass:#e7a6ff16;
-  --accent:#54f5db;
+  --accent:#68ffe6;
   --violet:#ffaae1;
   --danger:#ffadbf;
   font-family:system-ui,-apple-system,sans-serif;
@@ -26,8 +26,8 @@
 *{box-sizing:border-box}
 body{
   margin:0;min-height:100vh;min-height:100dvh;color:var(--text);
-  background:radial-gradient(ellipse at 9% 8%,#6b1d51 0%,transparent 45%),
-    radial-gradient(ellipse at 96% 30%,#3b2266 0%,transparent 48%),var(--bg);
+  background:radial-gradient(ellipse at 9% 8%,#481237 0%,transparent 45%),
+    radial-gradient(ellipse at 96% 30%,#29164d 0%,transparent 48%),var(--bg);
   background-attachment:fixed;
 }
 button,input{font:inherit}
@@ -88,7 +88,7 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .controls{margin-top:14px}
 .controls button{width:100%}
 .controls .end,.gameover button,.modalbox .primary{
-  background:linear-gradient(135deg,#f9fa66,#41ebd4);
+  background:linear-gradient(135deg,#fcff76,#4af9df);
   border-color:transparent;color:#101d32;font-weight:750;
 }
 .list{display:grid;gap:12px}
@@ -234,15 +234,15 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .brand-name small{display:block;margin-top:5px;color:var(--muted);font-size:.72rem;font-weight:650;letter-spacing:.035em}
 .icon{object-fit:cover;box-shadow:0 0 16px #ff5ea03d;border-color:#ff99d858}
 .team{
-  --tile:linear-gradient(140deg,#fbf465,#3becce);
+  --tile:linear-gradient(140deg,#fff878,#42f7d8);
   --glow:#43ead03b;
 }
 .team:nth-child(3n+2){
-  --tile:linear-gradient(140deg,#ff6ea8,#ffd46a);
+  --tile:linear-gradient(140deg,#ff79b4,#ffdf79);
   --glow:#ff72983b;
 }
 .team:nth-child(3n){
-  --tile:linear-gradient(140deg,#bd8cff,#72e3ff);
+  --tile:linear-gradient(140deg,#c799ff,#83efff);
   --glow:#be88ff3b;
 }
 .score{
@@ -250,9 +250,9 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px}
   box-shadow:0 8px 26px var(--glow);
 }
 .score small{color:#35233e}
-.landscape-total span{color:#f9f365;text-shadow:0 0 28px var(--glow)}
-.team:nth-child(3n+2) .landscape-total span{color:#ff9d9b}
-.team:nth-child(3n) .landscape-total span{color:#ceacff}
+.landscape-total span{color:#fff879;text-shadow:0 0 28px var(--glow)}
+.team:nth-child(3n+2) .landscape-total span{color:#ffa6a7}
+.team:nth-child(3n) .landscape-total span{color:#d9b8ff}
 </style>
 </head>
 
