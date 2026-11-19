@@ -194,6 +194,12 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .stats-team{padding:10px;overflow-wrap:anywhere}
 .stats-team strong{display:block;margin-bottom:4px}
 .stats-team div{color:var(--muted);font-size:.85rem}
+@media(max-width:600px) and (orientation:portrait){
+  body{display:flex;flex-direction:column}
+  main{display:flex;flex-direction:column;flex:1}
+  .list{flex:1;grid-auto-rows:1fr}
+  .score{align-self:stretch;align-content:center;font-size:clamp(2rem,11vw,3.45rem)}
+}
 @media(max-width:480px){
   .modal{align-items:flex-end}
 }
