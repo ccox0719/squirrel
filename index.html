@@ -231,9 +231,9 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px;ba
 .icon{object-fit:cover;box-shadow:none;border-color:#ff99d858}
 .team{
   --tile:linear-gradient(140deg,
-    color-mix(in srgb,var(--team-color,#4b3b78) 40%,white),
-    color-mix(in srgb,var(--team-color,#4b3b78) 60%,white));
-  --glow:color-mix(in srgb,var(--team-color,#4b3b78) 52%,transparent);
+    color-mix(in srgb,var(--team-color,#c17aff) 82%,white),
+    var(--team-color,#c17aff));
+  --glow:color-mix(in srgb,var(--team-color,#c17aff) 52%,transparent);
 }
 .score{
   background:var(--tile);color:#1c1029;border-color:#ffffff58;
@@ -241,7 +241,7 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px;ba
 }
 .score small{color:#35233e}
 .landscape-total span{
-  color:color-mix(in srgb,var(--team-color,#4b3b78) 43%,white);
+  color:var(--team-color,#c17aff);
   text-shadow:0 0 28px var(--glow);
 }
 </style>
@@ -434,7 +434,18 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px;ba
 <script>
 const KEY="hf_v2";
 const OLD_KEY="hf_final";
-const TEAM_COLORS=["#7A2E28","#1F5C3D","#8C5A1B","#4B3B78","#1E3A5F"];
+const TEAM_COLOR_UPGRADES={
+  "#7A2E28":"#FF4BB2",
+  "#1F5C3D":"#8DFF38",
+  "#8C5A1B":"#FFCA36",
+  "#4B3B78":"#C17AFF",
+  "#1E3A5F":"#37E9FF"
+};
+const TEAM_COLORS=Object.values(TEAM_COLOR_UPGRADES);
+function neonTeamColor(color){
+  const hex=color?.toUpperCase();
+  return TEAM_COLOR_UPGRADES[hex] || (TEAM_COLORS.includes(hex) ? hex : TEAM_COLORS[3]);
+}
 
 /* ---------- Rule presets ---------- */
 const DEFAULT_RULES={
@@ -465,7 +476,7 @@ function freshState(){
     round:1,finished:false,
     rules:JSON.parse(JSON.stringify(DEFAULT_RULES)),
     savedRules:[],
-    teams:[freshTeam("Team 1","#7A2E28"),freshTeam("Team 2","#1F5C3D")],
+    teams:[freshTeam("Team 1",TEAM_COLORS[0]),freshTeam("Team 2",TEAM_COLORS[1])],
     active:null
   };
 }
@@ -521,7 +532,7 @@ function render(){
     const rs=roundSum(t);
     const row=document.createElement("div");
     row.className="team";
-    row.style.setProperty("--team-color",t.color);
+    row.style.setProperty("--team-color",neonTeamColor(t.color));
     row.innerHTML=`
       <div class="team-details">
         <button class="name" onclick="openTeam(${i})">${esc(t.name)}</button>
@@ -587,7 +598,7 @@ function renderColorGrid(){
   colorGrid.innerHTML="";
   TEAM_COLORS.forEach(c=>{
     const s=document.createElement("div");
-    s.className="color-swatch"+(state.teams[state.active].color===c?" selected":"");
+    s.className="color-swatch"+(neonTeamColor(state.teams[state.active].color)===c?" selected":"");
     s.style.background=c;
     s.onclick=()=>{state.teams[state.active].color=c;save();renderColorGrid();render()};
     colorGrid.appendChild(s);
