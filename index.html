@@ -231,17 +231,17 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px;ba
 .icon{object-fit:cover;box-shadow:none;border-color:#ff99d858}
 .team{
   --tile:linear-gradient(140deg,
-    color-mix(in srgb,var(--team-color,#c17aff) 82%,white),
-    var(--team-color,#c17aff));
-  --glow:color-mix(in srgb,var(--team-color,#c17aff) 52%,transparent);
+    color-mix(in srgb,var(--team-color,#ab3dff) 92%,white),
+    var(--team-color,#ab3dff));
+  --glow:color-mix(in srgb,var(--team-color,#ab3dff) 52%,transparent);
 }
 .score{
-  background:var(--tile);color:#1c1029;border-color:#ffffff58;
-  box-shadow:0 8px 26px var(--glow);
+  background:var(--tile);color:#070709;border-color:#ffffff58;
+  box-shadow:0 0 25px var(--glow);
 }
-.score small{color:#35233e}
+.score small{color:#070709}
 .landscape-total span{
-  color:var(--team-color,#c17aff);
+  color:var(--team-color,#ab3dff);
   text-shadow:0 0 28px var(--glow);
 }
 </style>
@@ -435,16 +435,24 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px;ba
 const KEY="hf_v2";
 const OLD_KEY="hf_final";
 const TEAM_COLOR_UPGRADES={
-  "#7A2E28":"#FF4BB2",
-  "#1F5C3D":"#8DFF38",
-  "#8C5A1B":"#FFCA36",
-  "#4B3B78":"#C17AFF",
-  "#1E3A5F":"#37E9FF"
+  "#7A2E28":"#FF008F",
+  "#1F5C3D":"#5CFF00",
+  "#8C5A1B":"#FFF000",
+  "#4B3B78":"#AB3DFF",
+  "#1E3A5F":"#00F5FF"
+};
+// Keep previously selected colors in the same family.
+const PREVIOUS_TEAM_COLORS={
+  "#FF4BB2":"#FF008F",
+  "#8DFF38":"#5CFF00",
+  "#FFCA36":"#FFF000",
+  "#C17AFF":"#AB3DFF",
+  "#37E9FF":"#00F5FF"
 };
 const TEAM_COLORS=Object.values(TEAM_COLOR_UPGRADES);
 function neonTeamColor(color){
   const hex=color?.toUpperCase();
-  return TEAM_COLOR_UPGRADES[hex] || (TEAM_COLORS.includes(hex) ? hex : TEAM_COLORS[3]);
+  return TEAM_COLOR_UPGRADES[hex] || PREVIOUS_TEAM_COLORS[hex] || (TEAM_COLORS.includes(hex) ? hex : TEAM_COLORS[3]);
 }
 
 /* ---------- Rule presets ---------- */
