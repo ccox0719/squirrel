@@ -322,7 +322,8 @@ main{display:flex;flex-direction:column;flex:1}
       <details>
         <summary class="settings-toggle"><svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2"/></svg>Settings</summary>
         <div class="settings-items">
-          <button onclick="addTeam()">+ Team</button>
+          <button onclick="addTeam()">Add Team</button>
+          <button onclick="openTeamChooser('manage')">Manage Teams</button>
           <button onclick="openStats()">Stats</button>
           <button onclick="askResetRound()">Reset Round</button>
           <button onclick="askEndRound()">End Round</button>
@@ -427,7 +428,7 @@ main{display:flex;flex-direction:column;flex:1}
     <div class="color-grid" id="colorGrid"></div>
     <input id="teamNameInput" placeholder="Team name">
     <button class="primary" onclick="saveTeam()">Save</button>
-    <button class="danger" onclick="deleteTeam()">Delete Team</button>
+    <button class="danger" id="removeTeamButton" onclick="deleteTeam()">Remove Team</button>
     <button onclick="closeModals()">Cancel</button>
   </div>
 </div>
@@ -667,6 +668,7 @@ function openTeam(i){
   teamHint.textContent=state.teams[i].name;
   teamNameInput.value=state.teams[i].name;
   renderColorGrid();
+  document.getElementById("removeTeamButton").disabled=state.teams.length<=1;
   teamModal.style.display="flex";
 }
 function saveTeam(){
@@ -675,8 +677,15 @@ function saveTeam(){
 }
 function deleteTeam(){
   if(state.teams.length<=1)return;
-  state.teams.splice(state.active,1);
-  save();closeModals();render();
+  const team=state.teams[state.active];
+  if(!team)return;
+  confirmDlg("Remove Team?",`Remove ${team.name} from the current game? Any scores for this team in this game will be removed.`,()=>{
+    const index=state.teams.indexOf(team);
+    if(index===-1 || state.teams.length<=1)return;
+    state.teams.splice(index,1);
+    state.active=null;
+    save();closeModals();render();
+  });
 }
 function renderColorGrid(){
   colorGrid.innerHTML="";
@@ -1106,8 +1115,9 @@ document.addEventListener("keydown",event=>{
 });
 function openTeamChooser(mode){
   closeModals();
+  const manage=mode==="manage";
   const history=mode==="history" || state.finished;
-  document.getElementById("teamChooserTitle").textContent=history?"Round History":"Add Scores";
+  document.getElementById("teamChooserTitle").textContent=manage?"Manage Teams":history?"Round History":"Add Scores";
   const list=document.getElementById("teamChooserList");
   list.replaceChildren();
   state.teams.forEach((team,i)=>{
@@ -1115,7 +1125,8 @@ function openTeamChooser(mode){
     button.textContent=team.name;
     button.onclick=()=>{
       closeModals();
-      if(history)openLog(i);
+      if(manage)openTeam(i);
+      else if(history)openLog(i);
       else openSheet(i);
     };
     list.appendChild(button);
