@@ -51,13 +51,13 @@ main{padding-bottom:calc(env(safe-area-inset-bottom) + 20px)}
 .topbar{display:grid;gap:11px;margin-bottom:14px}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--bg)}
 .app-menu{flex:none;position:relative;z-index:5}
-.app-menu summary{
+.app-menu > summary{
   display:flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:0 11px;
   border:1px solid var(--line);border-radius:12px;background:var(--glass);
   color:var(--text);font-size:.85rem;font-weight:700;cursor:pointer;list-style:none;
 }
-.app-menu summary::-webkit-details-marker{display:none}
-.app-menu summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.app-menu > summary::-webkit-details-marker{display:none}
+.app-menu > summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .menu-chevron{width:8px;height:8px;border-right:2px solid;border-bottom:2px solid;transform:translateY(-2px) rotate(45deg)}
 .app-menu[open] .menu-chevron{transform:translateY(2px) rotate(225deg)}
 .menu-items{
@@ -191,33 +191,6 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px;ba
 .stats-team strong{display:block;margin-bottom:4px}
 .stats-team div{color:var(--muted);font-size:.85rem}
 .landscape-total{display:none}
-@media (orientation:landscape) and (max-width:1100px) and (max-height:600px){
-  header,.topbar,.controls,.gameover,.modal{display:none!important}
-  main{
-    max-width:none;height:100vh;height:100dvh;display:flex;flex-direction:column;
-    padding:max(10px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right))
-      max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
-  }
-  .list{
-    flex:1;min-height:0;overflow:auto;
-    grid-template-columns:repeat(auto-fit,minmax(min(100%,168px),1fr));
-    grid-auto-rows:minmax(140px,1fr);
-  }
-  .team{display:grid;grid-template-columns:minmax(0,1fr);align-content:center;padding:12px;text-align:center}
-  .team-details,.team .score{display:none}
-  .landscape-total{display:grid;gap:8px;min-width:0;overflow-wrap:anywhere}
-  .landscape-total strong{color:var(--text);font-size:clamp(1rem,3vw,1.8rem)}
-  .landscape-total span{
-    color:var(--accent);font-size:clamp(2.6rem,9vw,6.5rem);font-weight:750;
-    letter-spacing:-.055em;line-height:.98;font-variant-numeric:tabular-nums;
-  }
-}
-@media(max-width:600px) and (orientation:portrait){
-  body{display:flex;flex-direction:column}
-  main{display:flex;flex-direction:column;flex:1}
-  .list{flex:1;grid-auto-rows:1fr}
-  .score{align-self:stretch;align-content:center;font-size:clamp(2rem,11vw,3.45rem)}
-}
 @media(max-width:480px){
   .modal{align-items:flex-end}
 }
@@ -225,24 +198,105 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px;ba
   .modal{background:#080d1d;-webkit-backdrop-filter:none;backdrop-filter:none}
   .modalbox{background:var(--panel)}
 }
-/* Team colors carry through to both score displays. */
-.brand-name{min-width:0;line-height:1.02}
-.brand-name small{display:block;margin-top:5px;color:var(--muted);font-size:.72rem;font-weight:650;letter-spacing:.035em;overflow-wrap:anywhere}
-.icon{object-fit:cover;box-shadow:none;border-color:#ff99d858}
+
+/* Scoreboard and expanded menu */
+body{background:#030303;display:flex;flex-direction:column}
+header{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;
+  position:relative;z-index:5;background:#030303;column-gap:12px;
+}
+.htitle{font-size:clamp(1.55rem,6vw,2.25rem);font-weight:850;letter-spacing:-.035em}
+.brand-name{min-width:0;line-height:1.03}
+.brand-name small{
+  display:block;margin-top:5px;color:#a9a9af;font-size:.85rem;font-weight:500;
+  letter-spacing:0;overflow-wrap:anywhere;
+}
+.icon{
+  width:42px;height:42px;display:block;flex:none;background:none;border:0;
+  border-radius:0;box-shadow:none;color:#baff36;filter:drop-shadow(0 0 7px #aaff3b50);
+}
+.app-menu{position:static;display:contents}
+.app-menu summary{
+  grid-column:2;grid-row:1;width:44px;height:44px;padding:0;border:0;background:none;
+  justify-self:end;display:grid;place-items:center;
+}
+.menu-toggle{width:27px;height:22px;display:grid;align-content:space-between}
+.menu-toggle i{height:3px;border-radius:4px;background:#fff}
+.menu-items{
+  position:static;grid-column:1/-1;margin-top:12px;width:auto;padding:0;gap:0;
+  overflow:hidden;border:1px solid #303036;border-radius:15px;background:#141417;
+  box-shadow:none;
+}
+.app-menu .menu-items button,.menu-items .settings-toggle{
+  display:flex;align-items:center;justify-content:flex-start;gap:13px;min-height:50px;
+  width:100%;border:0;border-radius:0;padding:9px 16px;text-align:left;
+  font-size:1rem;cursor:pointer;background:transparent;
+}
+.menu-items > * + *{border-top:1px solid #303036 !important}
+.menu-items svg{width:22px;height:22px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8}
+.menu-items .settings-toggle{list-style:none}
+.settings-toggle::-webkit-details-marker{display:none}
+.settings-items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));padding:0 8px 8px;gap:4px}
+.app-menu .settings-items button{font-size:.88rem;min-height:44px;background:#202025;border-radius:8px;justify-content:center}
+main{display:flex;flex-direction:column;flex:1}
+.topbar{margin:0 0 15px}
+.round{
+  justify-content:center;background:none;border:0;box-shadow:none;padding:5px 0;
+  text-transform:uppercase;font-size:clamp(1rem,5vw,1.3rem);font-weight:850;letter-spacing:.055em;
+}
+.list{flex:1;grid-auto-rows:minmax(162px,1fr);gap:17px}
 .team{
-  --tile:linear-gradient(140deg,
-    color-mix(in srgb,var(--team-color,#ab3dff) 92%,white),
-    var(--team-color,#ab3dff));
-  --glow:color-mix(in srgb,var(--team-color,#ab3dff) 52%,transparent);
+  --glow:color-mix(in srgb,var(--team-color,#ab3dff) 34%,transparent);
+  container-type:inline-size;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr;
+  gap:0;align-items:center;text-align:center;padding:10px 12px 11px;border:2px solid var(--team-color);
+  border-radius:18px;background:#050505;
+  box-shadow:0 0 18px var(--glow),inset 0 0 14px var(--glow);
 }
-.score{
-  background:var(--tile);color:#070709;border-color:#ffffff58;
-  box-shadow:0 0 25px var(--glow);
+.team-details{display:flex;justify-content:center;min-width:0}
+.team .name,.landscape-total strong{
+  color:var(--team-color);text-transform:uppercase;font-weight:900;text-align:center;
+  font-size:clamp(1rem,7cqw,2.3rem);line-height:1.1;overflow-wrap:anywhere;
 }
-.score small{color:#070709}
-.landscape-total span{
-  color:var(--team-color,#ab3dff);
-  text-shadow:0 0 28px var(--glow);
+.team .name{min-height:44px;padding:2px 0}
+.team .score{
+  min-height:0;height:100%;align-content:center;gap:5px;padding:0;border:0;
+  background:none;color:#fff;box-shadow:none;
+}
+.team .score span,.landscape-total span{
+  font-size:clamp(1.6rem,calc(145cqw / var(--score-length,5)),7.6rem);
+  line-height:.93;letter-spacing:-.055em;font-weight:950;white-space:nowrap;
+}
+.team .score small{margin:0;color:#aaaab0;font-size:.66rem}
+.controls .end,.gameover button,.modalbox .primary{
+  background:#baff36;color:#11150b;
+}
+.modalbox{background:#17171b}
+.landscape-total{display:none}
+@media (orientation:landscape) and (max-height:600px), (orientation:landscape) and (min-width:900px){
+  body{height:100dvh}
+  header,main{max-width:none}
+  header{padding-top:max(8px,env(safe-area-inset-top));padding-bottom:8px}
+  .htitle{grid-column:1/-1;grid-row:1;justify-self:center;font-size:clamp(1.35rem,4vw,3.25rem)}
+  .brand-name small,.controls,.gameover,.team-details,.team .score{display:none!important}
+  .app-menu summary{z-index:1}
+  .menu-items{
+    position:absolute;top:100%;right:max(14px,env(safe-area-inset-right));width:min(300px,80vw);
+  }
+  main{min-height:0;padding-top:9px;padding-bottom:max(9px,env(safe-area-inset-bottom));gap:9px}
+  .list{
+    min-height:0;overflow:auto;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));
+    grid-auto-rows:minmax(120px,1fr);padding:8px;
+  }
+  .team{display:grid;grid-template-rows:minmax(0,1fr);padding:8px}
+  .landscape-total{display:grid;min-width:0;gap:clamp(6px,3dvh,24px);align-content:center}
+  .landscape-total span{
+    font-size:clamp(1.55rem,min(calc(155cqw / var(--score-length,5)),30dvh),17rem);
+    color:var(--team-color);text-shadow:0 0 18px var(--glow);
+  }
+  .topbar{order:1;margin:0}
+  .round{gap:12px;white-space:nowrap}
+  .round::before,.round::after{content:"";height:3px;width:clamp(20px,9vw,90px);border-radius:5px;background:#baff36}
+  .round::after{background:#ff008f}
 }
 </style>
 </head>
@@ -250,15 +304,28 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px;ba
 <body>
 
 <header>
-  <div class="htitle"><img class="icon" src="./neutzcox-icon.png" width="44" height="44" alt=""><span class="brand-name">Hand &amp; Foot<small id="activeRuleName"></small></span></div>
+  <div class="htitle">
+    <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M7 22c0-8 7-14 17-14s17 6 17 14c-12-4-22-4-34 0Zm3-1c0 12 6 17 14 22 8-5 14-10 14-22M25 8c0-4 2-6 5-8"/>
+    </svg>
+    <span class="brand-name">Hand and Foot<small id="activeRuleName"></small></span>
+  </div>
   <details class="app-menu" id="appMenu">
-    <summary>Menu <span class="menu-chevron" aria-hidden="true"></span></summary>
+    <summary aria-label="Menu"><span class="menu-toggle" aria-hidden="true"><i></i><i></i><i></i></span></summary>
     <nav class="menu-items" aria-label="Game controls">
-      <button onclick="addTeam()">+ Team</button>
-      <button onclick="openRules()">Rules</button>
-      <button onclick="openStats()">Stats</button>
-      <button onclick="openGames()">Games</button>
-      <button onclick="askResetRound()">Reset Round</button>
+      <button onclick="openTeamChooser('scores')"><svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M4 12h16"/></svg>Add Scores</button>
+      <button onclick="openTeamChooser('history')"><svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Round History</button>
+      <button onclick="openRules()"><svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-3-3-6-3-10-2v15c4-1 7-1 10 2 3-3 6-3 10-2V4c-4-1-7-1-10 2v15"/></svg>Game Rules</button>
+      <details>
+        <summary class="settings-toggle"><svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2"/></svg>Settings</summary>
+        <div class="settings-items">
+          <button onclick="addTeam()">+ Team</button>
+          <button onclick="openStats()">Stats</button>
+          <button onclick="openGames()">Games</button>
+          <button onclick="askResetRound()">Reset Round</button>
+          <button onclick="askEndRound()">End Round</button>
+        </div>
+      </details>
     </nav>
   </details>
 </header>
@@ -281,6 +348,14 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px;ba
 </div>
 
 </main>
+
+<div class="modal" id="teamChooserModal">
+  <div class="modalbox" role="dialog" aria-modal="true" aria-labelledby="teamChooserTitle">
+    <h3 id="teamChooserTitle"></h3>
+    <div id="teamChooserList"></div>
+    <button onclick="closeModals()">Cancel</button>
+  </div>
+</div>
 
 <!-- Rules Modal -->
 <div class="modal" id="rulesModal">
@@ -541,15 +616,14 @@ function render(){
     const row=document.createElement("div");
     row.className="team";
     row.style.setProperty("--team-color",neonTeamColor(t.color));
+    row.style.setProperty("--score-length",Math.max(5,fmt(grand(t)).length));
     row.innerHTML=`
       <div class="team-details">
         <button class="name" onclick="openTeam(${i})">${esc(t.name)}</button>
-        ${state.finished?"":`<span class="rdlabel">This round: ${fmt(rs)}</span>
-        <button class="team-log" onclick="openLog(${i})">Log</button>`}
       </div>
       <button class="score" onclick="${state.finished?"openLog":"openSheet"}(${i})">
         <span>${fmt(grand(t))}</span>
-        <small>${state.finished?"View log":"Tap to score"}</small>
+        <small>${state.finished?"View log":`This round: ${fmt(rs)} · Tap to score`}</small>
       </button>
       <div class="landscape-total">
         <strong>${esc(t.name)}</strong>
@@ -1023,8 +1097,26 @@ document.addEventListener("keydown",event=>{
     appMenu.querySelector("summary").focus();
   }
 });
+function openTeamChooser(mode){
+  closeModals();
+  const history=mode==="history" || state.finished;
+  document.getElementById("teamChooserTitle").textContent=history?"Round History":"Add Scores";
+  const list=document.getElementById("teamChooserList");
+  list.replaceChildren();
+  state.teams.forEach((team,i)=>{
+    const button=document.createElement("button");
+    button.textContent=team.name;
+    button.onclick=()=>{
+      closeModals();
+      if(history)openLog(i);
+      else openSheet(i);
+    };
+    list.appendChild(button);
+  });
+  document.getElementById("teamChooserModal").style.display="flex";
+}
 function closeModals(){
-  ["rulesModal","teamModal","sheetModal","logModal","confirmModal","statsModal","gamesModal"].forEach(id=>{
+  ["rulesModal","teamModal","sheetModal","logModal","confirmModal","statsModal","gamesModal","teamChooserModal"].forEach(id=>{
     document.getElementById(id).style.display="none";
   });
 }
