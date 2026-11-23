@@ -317,13 +317,13 @@ main{display:flex;flex-direction:column;flex:1}
       <button onclick="openTeamChooser('scores')"><svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M4 12h16"/></svg>Add Scores</button>
       <button onclick="openTeamChooser('history')"><svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Round History</button>
       <button onclick="openRules()"><svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-3-3-6-3-10-2v15c4-1 7-1 10 2 3-3 6-3 10-2V4c-4-1-7-1-10 2v15"/></svg>Game Rules</button>
+      <button onclick="openTeamChooser('manage')">Manage Teams</button>
       <button onclick="openGames('save')">Save Game</button>
       <button onclick="openGames('load')">Load Game</button>
       <details>
         <summary class="settings-toggle"><svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2"/></svg>Settings</summary>
         <div class="settings-items">
           <button onclick="addTeam()">Add Team</button>
-          <button onclick="openTeamChooser('manage')">Manage Teams</button>
           <button onclick="openStats()">Stats</button>
           <button onclick="askResetRound()">Reset Round</button>
           <button onclick="askEndRound()">End Round</button>
