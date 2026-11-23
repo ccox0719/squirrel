@@ -280,7 +280,7 @@ main{display:flex;flex-direction:column;flex:1}
   .brand-name small,.controls,.gameover,.team-details,.team .score{display:none!important}
   .app-menu summary{z-index:1}
   .menu-items{
-    position:absolute;top:100%;right:max(14px,env(safe-area-inset-right));width:min(300px,80vw);
+    position:absolute;top:100%;right:max(14px,env(safe-area-inset-right));width:min(300px,80vw);max-height:calc(100dvh - 78px);overflow-y:auto;
   }
   main{min-height:0;padding-top:9px;padding-bottom:max(9px,env(safe-area-inset-bottom));gap:9px}
   .list{
@@ -298,6 +298,7 @@ main{display:flex;flex-direction:column;flex:1}
   .round::before,.round::after{content:"";height:3px;width:clamp(20px,9vw,90px);border-radius:5px;background:#baff36}
   .round::after{background:#ff008f}
 }
+#gamesModal [hidden]{display:none}
 </style>
 </head>
 
@@ -316,12 +317,13 @@ main{display:flex;flex-direction:column;flex:1}
       <button onclick="openTeamChooser('scores')"><svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M4 12h16"/></svg>Add Scores</button>
       <button onclick="openTeamChooser('history')"><svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Round History</button>
       <button onclick="openRules()"><svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-3-3-6-3-10-2v15c4-1 7-1 10 2 3-3 6-3 10-2V4c-4-1-7-1-10 2v15"/></svg>Game Rules</button>
+      <button onclick="openGames('save')">Save Game</button>
+      <button onclick="openGames('load')">Load Game</button>
       <details>
         <summary class="settings-toggle"><svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2"/></svg>Settings</summary>
         <div class="settings-items">
           <button onclick="addTeam()">+ Team</button>
           <button onclick="openStats()">Stats</button>
-          <button onclick="openGames()">Games</button>
           <button onclick="askResetRound()">Reset Round</button>
           <button onclick="askEndRound()">End Round</button>
         </div>
@@ -470,7 +472,7 @@ main{display:flex;flex-direction:column;flex:1}
       <input id="gameName" aria-label="Game name" placeholder="Game name" maxlength="80" required>
       <button class="primary" type="submit">Save This Game</button>
     </form>
-    <button onclick="closeModals();askNewGame()">New Game</button>
+    <button id="gamesNewButton" onclick="closeModals();askNewGame()">New Game</button>
     <div class="game-list" id="gameList"></div>
     <section id="cloudPanel" aria-label="Cloud backup">
       <div class="hint" id="cloudStatus" role="status">Loading cloud backup…</div>
@@ -913,7 +915,12 @@ function refreshGameList(){
   });
   if(!list.children.length) list.textContent="Saved and completed games will appear here.";
 }
-function openGames(){
+function openGames(mode){
+  const saving=mode==="save";
+  document.getElementById("gamesTitle").textContent=saving?"Save Game":"Load Game";
+  document.getElementById("saveGameForm").hidden=!saving;
+  document.getElementById("gameList").hidden=saving;
+  document.getElementById("gamesNewButton").hidden=saving;
   document.getElementById("gameName").value=state.gameName||gameLabel();
   document.getElementById("gameStatus").textContent="";
   refreshGameList();
